@@ -39,20 +39,47 @@ The project provides a ready-to-use template for deploying secure EKS infrastruc
 | `workloads`   | Example secure workload with NetworkPolicy + IRSA      |
 | `monitoring`  | Prometheus, Grafana, Loki with Helm                    |
 
-##  Getting Started
+## Project Structure
+
+```
+.
+├── terragrunt.hcl      # Кореневий конфіг
+├── region.hcl          # Налаштування регіону
+├── infrastructure/     # Terraform модулі
+│   ├── vpc/           # Мережева інфраструктура
+│   ├── eks/           # Kubernetes кластер
+│   ├── karpenter/     # Автоскейлінг нод
+│   └── state-storage/ # S3 + DynamoDB для стейту
+└── env/               # Середовища
+    └── dev/          # Dev середовище
+        ├── terragrunt.hcl  # Конфіг середовища
+        ├── vpc/
+        ├── eks/
+        ├── karpenter/
+        └── state-storage/
+```
+
+## Getting Started
 
 ### Prerequisites
 - Terraform >= 1.5
+- Terragrunt >= 0.45
 - AWS CLI configured
 - kubectl & helm
 
-### Usage
+### Deployment
 
-You can deploy the infrastructure using either the Makefile (recommended) or manual steps.
-
-#### Using Makefile (Recommended)
-
+1. Створення інфраструктури для стейту:
 ```bash
+cd env/dev/state-storage
+DISABLE_INIT=true terragrunt apply
+```
+
+2. Розгортання всієї інфраструктури:
+```bash
+cd env/dev
+terragrunt run-all init
+terragrunt run-all plan
 # Show available commands
 make help
 
