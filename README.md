@@ -69,31 +69,66 @@ The project provides a ready-to-use template for deploying secure EKS infrastruc
 
 ### Deployment
 
-1. Створення інфраструктури для стейту:
+### 1. Підготовка інфраструктури для стейту
+
 ```bash
+# Створюємо S3 бакет і DynamoDB таблицю для стейту
 cd env/dev/state-storage
+DISABLE_INIT=true terragrunt init
 DISABLE_INIT=true terragrunt apply
 ```
 
-2. Розгортання всієї інфраструктури:
+### 2. Розгортання інфраструктури
+
+Варіант 1: Розгортання всього одразу
 ```bash
 cd env/dev
 terragrunt run-all init
 terragrunt run-all plan
-# Show available commands
-make help
+terragrunt run-all apply
+```
 
-# Initialize all modules
-make init
+Варіант 2: Розгортання по модулях
+```bash
+# VPC
+cd env/dev/vpc
+terragrunt init
+terragrunt apply
 
-# Deploy everything
-make apply GITOPS_ENGINE=argocd
+# EKS
+cd ../eks
+terragrunt init
+terragrunt apply
 
-# Check cluster status
-make status
+# Karpenter
+cd ../karpenter
+terragrunt init
+terragrunt apply
+```
 
-# Clean up everything
-make destroy
+### 3. Перевірка розгортання
+
+```bash
+# Отримуємо kubeconfig для кластера
+aws eks update-kubeconfig --name eks-zero-trust-dev --region us-west-2
+
+# Перевіряємо ноди
+kubectl get nodes
+
+# Перевіряємо поди
+kubectl get pods -A
+```
+
+### 4. Видалення інфраструктури
+
+```bash
+# Видаляємо всі ресурси
+cd env/dev
+terragrunt run-all destroy
+
+# В кінці видаляємо інфраструктуру для стейту
+cd state-storage
+DISABLE_INIT=true terragrunt destroy
 ```
 
 #### Manual Deployment

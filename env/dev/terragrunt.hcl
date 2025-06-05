@@ -1,14 +1,16 @@
+include "root" {
+  path = find_in_parent_folders("root.hcl")
+}
+
 locals {
   environment = "dev"
-}
-
-include "root" {
-  path = find_in_parent_folders()
-}
-
-inputs = {
-  environment  = local.environment
-  cluster_name = "eks-zero-trust-${local.environment}"
+  
+  # Загальні теги для всіх ресурсів
+  common_tags = {
+    Environment = local.environment
+    Team        = "platform"
+    CostCenter  = "platform-${local.environment}"
+  }
 
   # VPC налаштування
   vpc_cidr = "10.0.0.0/16"
